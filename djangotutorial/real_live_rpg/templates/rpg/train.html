@@ -1,0 +1,141 @@
+{% extends "magic/basics.html" %}
+<!--  -->
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 d-flex justify-content-end">
+        <a type="button" class="btn btn-outline-success" href="{% url 'rpg:index' %}">Back to skills</a>
+    </div>
+    <!-- Title -->
+    <div class="col-12 my-3">
+        <h1 class="text-center"><strong>{{ skill.skill_name }}</strong> <br /> Training Session</h1>
+    </div>
+    <!-- Level -->
+    <div class="col-12 my-3">
+        <h2 class="h4 font-weight-bold">Level</h2>
+        <p><strong>Current Level</strong>: {{ skill.level }}</p>
+        <div class="progress" role="progressbar" aria-label="" aria-valuenow="{{ xp_percent }}%" aria-valuemin="0" aria-valuemax="100" style="height: 20px">
+            <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" style="width: {{ xp_percent }}%"></div>
+        </div>
+        <p>{{ skill.current_xp }} / {{ skill.xp_for_next_level }}</p>
+    </div>
+    <!-- Graphs -->
+    <div class="col-12 my-3">
+        <h2 class="h4 font-weight-bold">Graph</h2>
+        {% if chart_data %}
+        <!-- graph nav -->
+        <ul class="nav nav-tabs mb-3">
+            {% for range in date_ranges %}
+            <li class="nav-item">
+                <a class="nav-link {% if selected_range == range.0 %}active{% endif %}" href="?range={{ range.0 }}">{{ range.1 }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <canvas id="trainingChart" height="100"></canvas>
+        {{ chart_data|json_script:"chart-data" }}
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const rawData = JSON.parse(document.getElementById('chart-data').textContent);
+
+            const labels = rawData.map(item => item.date);
+            const dataPoints = rawData.map(item => item.minutes);
+            const largestMinutes = Math.max(...dataPoints)
+
+            new Chart(document.getElementById('trainingChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Minutes Trained',
+                        data: dataPoints,
+                        spanGaps: false,
+                        fill: true,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Minutes'
+                            },
+                            max: (largestMinutes + 10)
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+        {% else %}
+        <p>No training sessions yet</p>
+        {% endif %}
+    </div>
+    <!-- Form ~record a new session -->
+    <div class="col-12 my-3">
+        <h2 class="h4 font-weight-bold">Record Session</h2>
+        {% include "partials/_training_session_form.html" with action_url=request.path button_label="Log Training" %}
+    </div>
+    <!-- Archive ~previous sessions  -->
+    <div class="col-12 my-3">
+        <h2 class="h4 font-weight-bold">Archives</h2>
+        {% if skill_sessions_list %}
+        <p>Sessions found: {{ skill_sessions_list|length }}</p>
+        {% endif %}
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered table-striped">
+                <thead class="table-dark bg-primary text-white">
+                    <tr>
+                        <th>Date</th>
+                        <th>Start time</th>
+                        <th>End time</th>
+                        <th>Duration</th>
+                        <th>Options</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if skill_sessions_list %}
+                    {% for session in skill_sessions_list %}
+                    <tr>
+                        <td>{{ session.date|date:"Y-m-d" }}</td>
+                        <td>{{ session.start_time|date:"g:i a" }}</td>
+                        <td>{{ session.end_time|date:"g:i a" }}</td>
+                        <td>
+                            <span class="badge rounded-pill text-bg-secondary">
+                                {{ session.amount_time }}
+                            </span>
+                        </td>
+                        <td class="d-flex justify-content-center">
+                            <a href="{% url 'rpg:edit_training_session' session.id %}" class="btn btn-sm btn-warning text-white mx-1">
+                                Edit
+                            </a>
+                            <a href="{% url 'rpg:remove_training_session' session.id %}" class="btn btn-sm btn-danger text-white mx-1">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <p>No training sessions yet</p>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</div>
+<!--  -->
+{% endblock %}
+<!--  -->

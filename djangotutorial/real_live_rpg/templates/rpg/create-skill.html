@@ -1,0 +1,56 @@
+{% extends "magic/basics.html" %}
+<!--  -->
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 d-flex justify-content-end">
+        <a type="button" class="btn btn-outline-success" href="{% url 'rpg:index' %}">Back to Skills</a>
+    </div>
+    <!-- Title -->
+    <div class="col-12 my-3">
+        <h1 class="text-center">Add Skill</h1>
+    </div>
+    <!-- Form ~record a new Skill -->
+    <div class="col-12 my-5">
+        {% if form.errors %}
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8">
+                <div class="alert alert-danger">
+                    <ul>
+                        {% for field in form %}
+                        {% for error in field.errors %}
+                        <li><strong>{{ field.label }}</strong>: {{ error }}</li>
+                        {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <form method="POST" class="d-flex justify-content-center">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <!--  -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="mb-3">
+                        <label for="{{ form.skill_name.id_for_label }}" class="form-label">Skill Name</label>
+                        {{ form.skill_name }}
+                        {{ form.skill_name.errors }}
+                    </div>
+                </div>
+                <div class="col-12">
+                    <button class="btn btn-success float-end" type="submit">
+                        {{ button_label|default:"Save"}}
+                    </button>
+                </div>
+            </div>
+            <!--  -->
+        </form>
+    </div>
+</div>
+<!--  -->
+{% endblock %}

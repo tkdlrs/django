@@ -1,0 +1,61 @@
+{% extends "magic/basics.html" %}
+
+{% block content %}
+<div class="row justify-content-end my-5">
+    <div class="col-12 col-sm-10">
+        <h1>Real Live RPG</h1>
+    </div>
+    <div class="col-12 col-sm-2">
+        <a type="button" class="btn btn-success" href="{% url 'rpg:create_skill' %}">Create Skill</a>
+    </div>
+</div>
+<div class="row justify-content-start">
+    <div class="col-12 ">
+        {% if skill_list %}
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered table-striped text-center">
+                <thead class="table-dark bg-primary text-white">
+                    <tr class="w-100">
+                        <th>Skill</th>
+                        <th>Current Level</th>
+                        <th>Current Streak</th>
+                        <th>Longest Streak</th>
+                        <th>Total time spent on this skill (Minutes)</th>
+                        <th>Turtlebucks (TB)</th>
+                        <th>Options</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for skill in skill_list %}
+                    <tr class="w-100">
+                        <td>{{ skill.skill_name }}</td>
+                        <td>{{ skill.level }}</td>
+                        <td>{{ skill.current_streak }}</td>
+                        <td>{{ skill.longest_streak }}</td>
+                        <td>{{ skill.total_minutes }}</td>
+                        <td>{{ skill.training_at_minimum_wage_rate }}</td>
+                        <td>
+                            <div class="w-100 d-flex justify-content-center">
+                                <a class="btn btn-sm btn-primary mx-1" href="{% url 'rpg:train' skill.id %}">Train Skill</a>
+                                <div class="">
+                                    <form method="POST" action="{% url 'rpg:delete_skill' skill.id %}">
+                                        {% csrf_token %}
+                                        <!--  -->
+                                        <button class="btn btn-sm btn-danger mx-1" type="submit">Delete Skill</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>No skills added yet.</p>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}
